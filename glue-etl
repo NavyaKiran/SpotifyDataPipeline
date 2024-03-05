@@ -1,0 +1,89 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node Albums
+Albums_node1709618711578 = glueContext.create_dynamic_frame.from_options(
+    format_options={"quoteChar": '"', "withHeader": True, "separator": ","},
+    connection_type="s3",
+    format="csv",
+    connection_options={
+        "paths": ["s3://navya-spotify-bucket/staging-spotify-data/albums.csv"],
+        "recurse": True,
+    },
+    transformation_ctx="Albums_node1709618711578",
+)
+
+# Script generated for node Artists
+Artists_node1709618713554 = glueContext.create_dynamic_frame.from_options(
+    format_options={"quoteChar": '"', "withHeader": True, "separator": ","},
+    connection_type="s3",
+    format="csv",
+    connection_options={
+        "paths": ["s3://navya-spotify-bucket/staging-spotify-data/artists.csv"],
+        "recurse": True,
+    },
+    transformation_ctx="Artists_node1709618713554",
+)
+
+# Script generated for node Tracks
+Tracks_node1709618714754 = glueContext.create_dynamic_frame.from_options(
+    format_options={"quoteChar": '"', "withHeader": True, "separator": ","},
+    connection_type="s3",
+    format="csv",
+    connection_options={
+        "paths": ["s3://navya-spotify-bucket/staging-spotify-data/track.csv"],
+        "recurse": True,
+    },
+    transformation_ctx="Tracks_node1709618714754",
+)
+
+# Script generated for node Join Albums and Artists
+JoinAlbumsandArtists_node1709618762420 = Join.apply(
+    frame1=Albums_node1709618711578,
+    frame2=Artists_node1709618713554,
+    keys1=["artist_id"],
+    keys2=["id"],
+    transformation_ctx="JoinAlbumsandArtists_node1709618762420",
+)
+
+# Script generated for node Join Tracks and (Albums and Artists)
+JoinTracksandAlbumsandArtists_node1709618805737 = Join.apply(
+    frame1=Tracks_node1709618714754,
+    frame2=JoinAlbumsandArtists_node1709618762420,
+    keys1=["track_id"],
+    keys2=["track_id"],
+    transformation_ctx="JoinTracksandAlbumsandArtists_node1709618805737",
+)
+
+# Script generated for node Drop Fields
+DropFields_node1709619073940 = DropFields.apply(
+    frame=JoinTracksandAlbumsandArtists_node1709618805737,
+    paths=["`.track_id`", "id"],
+    transformation_ctx="DropFields_node1709619073940",
+)
+
+# Script generated for node Destination
+Destination_node1709619120315 = glueContext.write_dynamic_frame.from_options(
+    frame=DropFields_node1709619073940,
+    connection_type="s3",
+    format="glueparquet",
+    connection_options={
+        "path": "s3://navya-spotify-bucket/cleaned-spotify-data/",
+        "partitionKeys": [],
+    },
+    format_options={"compression": "snappy"},
+    transformation_ctx="Destination_node1709619120315",
+)
+
+job.commit()
