@@ -1,5 +1,11 @@
 SPOTIFY DATA PIPELINE
 
+PIPELINE: 
+
+          CSV FILE -> S3 Stage Bucket -> Glue ETL -> S3 Clean Bucket -> Amazon Athena -> S3 Result Bucket -> Amazon Quicksight
+
+
+
 * I have used services on AWS for this project. I first begin by creating an IAM role in order to provide access only to necessary services (Glue, Athena, S3 and Quicksight). 
 * I have used the Spotify data from Kaggle for this project. 
 * I create a bucket (spotify-data) in order to store the raw data. A bucket is an S3 data storage object. This is our stage data. 
