@@ -1,0 +1,16 @@
+SPOTIFY DATA PIPELINE
+
+* I have used services on AWS for this project. I first begin by creating an IAM role in order to provide access only to necessary services (Glue, Athena, S3 and Quicksight). 
+* I have used the Spotify data from Kaggle for this project. 
+* I create a bucket (spotify-data) in order to store the raw data. A bucket is an S3 data storage object. This is our stage data. 
+* Next, I also create an empty bucket (spotify-data-cleaned) to store the data after the ETL process. 
+* Now, I define an ETL job on glue. AWS has made it easier by introducing visual ETL. The data flow diagram for this job is in the file titled "ETL Data Pipeline.png". The ETL process involves joining the Artists and Albums files on artist_id and id respectively. 
+This is then followed by joining Tracks on track_id. The next step is to delete common columns since an inner join is used. The last step is to place the destination folder. After this, the pipeline is ready. 
+* I then run the ETL job. The ETL job takes about 2 minutes to complete execution. [Also, make sure to give glue access to S3 by creating a role and adding a policy].
+* This data is stored in the spotify-data-cleaned-bucket. One thing to notice here is that, the cleaned data is stored in blocks of parquet files of 3.3MB each. 
+* Next, create a database to store the result of the crawler. 
+* The next step is to build a crawler. A crawler will scour the bucket extracting meta-data and data. The result of the crawler is a table /or tables contained in the newly created/selected database. 
+* This database can then be connected to a querying tool such as Athena. 
+* Athena is a data query tool where we can use SQL to query the tables in the database. But before we begin to query, we need to create another bucked in order to store the results (metadata and data) of the query process. 
+* These results can then be used with Quicksight for visualization. 
+
